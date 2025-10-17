@@ -5,13 +5,15 @@
 import { GoogleGenAI } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
+// Lazily initialize the AI client to avoid crashing on load if API key is not set.
+function getAi() {
+    const API_KEY = process.env.API_KEY;
+    if (!API_KEY) {
+      // This allows the app to load and will only throw an error when a generation is attempted.
+      throw new Error("API_KEY environment variable is not set.");
+    }
+    return new GoogleGenAI({ apiKey: API_KEY });
 }
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 
 // --- Helper Functions ---
@@ -73,6 +75,7 @@ function processGeminiResponse(response: GenerateContentResponse): string {
  * @returns The GenerateContentResponse from the API.
  */
 async function callGeminiWithRetry(imagePart: object, textPart: object): Promise<GenerateContentResponse> {
+    const ai = getAi(); // Lazily get the AI instance.
     const maxRetries = 3;
     const initialDelay = 1000;
 

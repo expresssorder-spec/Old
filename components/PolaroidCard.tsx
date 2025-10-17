@@ -29,13 +29,31 @@ const LoadingSpinner = () => (
     </div>
 );
 
-const ErrorDisplay = () => (
-    <div className="flex items-center justify-center h-full">
-         <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-    </div>
-);
+const ErrorDisplay = ({ message }: { message?: string }) => {
+    const defaultMessage = 'وقع شي مشكل غير متوقع. حاول مرة خرى.';
+    // A simple regex to check if the error is about the API key.
+    const isApiKeyError = /API(.|_| )?KEY/i.test(message || '');
+    const displayMessage = isApiKeyError ? "ال API Key غالط. عافاك تأكد منو ف AI Studio." : (message || defaultMessage);
+
+    return (
+        <div className="relative flex flex-col items-center justify-center h-full text-center group cursor-help">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {/* Tooltip */}
+            <div 
+                className="absolute bottom-full mb-2 w-72 max-w-[calc(100%-1rem)] p-3 text-sm text-white bg-neutral-800 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50 shadow-lg"
+                role="tooltip"
+            >
+               <p className="font-sans font-bold text-right text-red-400 mb-1">!خطأ</p>
+               <p className="font-sans font-light text-right leading-relaxed">{displayMessage}</p>
+               {/* Arrow */}
+               <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-t-8 border-t-neutral-800"></div>
+            </div>
+        </div>
+    );
+};
+
 
 const Placeholder = () => (
     <div className="flex flex-col items-center justify-center h-full text-neutral-500 group-hover:text-neutral-300 transition-colors duration-300">
@@ -109,7 +127,7 @@ const PolaroidCard: React.FC<PolaroidCardProps> = ({ imageUrl, caption, status, 
         <>
             <div className="w-full bg-neutral-900 shadow-inner flex-grow relative overflow-hidden group">
                 {status === 'pending' && <LoadingSpinner />}
-                {status === 'error' && <ErrorDisplay />}
+                {status === 'error' && <ErrorDisplay message={error} />}
                 {status === 'done' && imageUrl && (
                     <>
                         <div className={cn(

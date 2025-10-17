@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import type { GenerateContentResponse } from "@google/genai";
 
 // Lazily initialize the AI client to avoid crashing on load if API key is not set.
@@ -84,6 +84,9 @@ async function callGeminiWithRetry(imagePart: object, textPart: object): Promise
             return await ai.models.generateContent({
                 model: 'gemini-2.5-flash-image',
                 contents: { parts: [imagePart, textPart] },
+                config: {
+                    responseModalities: [Modality.IMAGE],
+                },
             });
         } catch (error) {
             console.error(`خطأ فاش عيطنا ل Gemini API (المحاولة ${attempt}/${maxRetries}):`, error);
